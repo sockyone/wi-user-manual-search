@@ -13,7 +13,8 @@
     "rxjs": "^6.5.5",
     "vue": "^2.6.11",
     "vue-custom-element": "^3.2.14",
-    "vue-router": "^3.1.6"
+    "vue-router": "^3.1.6",
+    "wi-css": "git+https://github.com/revotechUET/wi-css.git#e7d198f"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.3.0",
