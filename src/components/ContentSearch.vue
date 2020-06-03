@@ -1,58 +1,95 @@
 <template>
-    <div class="ContentSearch">
-        <input type="text" v-model="searchText">
-        <div>
-            <div v-for="data in results" :key="data._id">
-                <highlight-element :data="data"></highlight-element>
-            </div>
-        </div>
+  <div class="ContentSearch">
+    <div class="i2g-search-box-with-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" role="img" > <path fill-rule="evenodd" clip-rule="evenodd" d="M10.6002 12.0498C9.49758 12.8568 8.13777 13.3333 6.66667 13.3333C2.98477 13.3333 0 10.3486 0 6.66667C0 2.98477 2.98477 0 6.66667 0C10.3486 0 13.3333 2.98477 13.3333 6.66667C13.3333 8.15637 12.8447 9.53194 12.019 10.6419C12.0265 10.6489 12.0338 10.656 12.0411 10.6633L15.2935 13.9157C15.6841 14.3063 15.6841 14.9394 15.2935 15.33C14.903 15.7205 14.2699 15.7205 13.8793 15.33L10.6269 12.0775C10.6178 12.0684 10.6089 12.0592 10.6002 12.0498ZM11.3333 6.66667C11.3333 9.244 9.244 11.3333 6.66667 11.3333C4.08934 11.3333 2 9.244 2 6.66667C2 4.08934 4.08934 2 6.66667 2C9.244 2 11.3333 4.08934 11.3333 6.66667Z" /> </svg>
+      <input type="search" placeholder="Search in user manual" autocomplete="off" v-model="searchText" style="background: #fff !important;" />
     </div>
+    <div class="resultContent">
+      <div v-for="data in results" :key="data._id" class="item-row">
+        <highlight-element :data="data"></highlight-element>
+      </div>
+    </div>
+    <!-- <div v-if="!results.length" class="background-search"></div> -->
+  </div>
 </template>
 
 <script>
+import { BehaviorSubject } from "rxjs";
+import { debounceTime } from "rxjs/operators";
+import axios from "axios";
+import HighlightElement from "./HighlightElement";
 
-import { BehaviorSubject } from 'rxjs'
-import { debounceTime } from 'rxjs/operators'
-import axios from 'axios'
-import HighlightElement from './HighlightElement'
-
-const textSearchSubject = new BehaviorSubject("")
-const textSearchSubjectDebounced = textSearchSubject.pipe(debounceTime(1000))
+const textSearchSubject = new BehaviorSubject("");
+const textSearchSubjectDebounced = textSearchSubject.pipe(debounceTime(1000));
 
 export default {
-  name: 'ContentSearch',
+  name: "ContentSearch",
   components: {
-      "highlight-element": HighlightElement
+    "highlight-element": HighlightElement
   },
   data: function() {
-      return {
-          searchText: "",
-          results: []
-      }
+    return {
+      searchText: "",
+      results: []
+    };
   },
   mounted: function() {
-      let self = this
-      textSearchSubjectDebounced.subscribe((data)=>{
-        //console.log('data:', data)
-        axios.post("http://112.137.129.229:30666/search", {
-            textSearch: data
-        }).then((rsFromSvr)=>{
-            console.log(rsFromSvr.data)
-            self.results = rsFromSvr.data
+    let self = this;
+    textSearchSubjectDebounced.subscribe(data => {
+      //console.log('data:', data)
+      axios
+        .post("http://112.137.129.229:30666/search", {
+          textSearch: data
         })
-      })
+        .then(rsFromSvr => {
+          console.log(rsFromSvr.data);
+          self.results = rsFromSvr.data;
+        });
+    });
   },
   watch: {
-      searchText(newText) {
-          textSearchSubject.next(newText)
-      }
+    searchText(newText) {
+      textSearchSubject.next(newText);
+    }
   }
-}
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="less">
-    em {
-        font-weight: 900;
-    }
+em {
+  font-weight: bold;
+  font-style: unset;
+}
+.i2g-search-box-with-icon {
+  width: 100%;
+  max-width: 600px;
+  margin: 20px;
+}
+.background-search {
+
+}
+.ContentSearch {
+  padding: 20px;
+  width: 100%;
+  height: 100%;
+  min-width: 100vw;
+  min-height: 100vh;
+  position: fixed;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  overflow: hidden;
+}
+.resultContent {
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  align-items: center;
+  width: 100%;
+}
+.item-row {
+  max-width: 600px;
+  width: 100%;
+}
 </style>
