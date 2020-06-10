@@ -9,7 +9,7 @@
     </div>
     <div v-if="!loadingState" class="resultContent">
       <div v-if="sentTextSearch.length > 0">
-        No results found for {{sentTextSearch}}
+        No results found for "{{sentTextSearch}}"
       </div>
       <div v-for="data in results" :key="data._id" class="item-row">
         <highlight-element :data="data"></highlight-element>
@@ -60,9 +60,9 @@ export default {
         .then(rsFromSvr => {
           //console.log(rsFromSvr.data);
           if (rsFromSvr.data.length === 0) {
-            self.sentTextSearch = data;
+            self.sentTextSearch = data
           } else {
-            self.sentTextSearch = "";
+            self.sentTextSearch = ""
           }
           // if (rsFromSvr.data.length > 0) {
           //   // sort
@@ -70,7 +70,13 @@ export default {
           // }
           //console.log(rsFromSvr.data)
           self.results = rsFromSvr.data.sort((a,b) => {
-            return a._source.chapter - b._source.chapter
+            let ax = (a._source.position[a._source.position.length - 1]).name
+            let bs = (b._source.position[b._source.position.length - 1]).name
+            if (ax.startsWith("Module ")) ax = ax.match(/Module (\d)+:/)[1]
+            else ax = ax.match(/(([^\s])+). /)[1]
+            if (bs.startsWith("Module ")) bs = bs.match(/Module (\d)+:/)[1]
+            else bs = bs.match(/(([^\s])+). /)[1]
+            return ax.localeCompare(bs, undefined, {numeric: true})
           });
           self.loadingState = false
         });
