@@ -11,9 +11,14 @@
       <div v-if="sentTextSearch.length > 0">
         No results found for "{{sentTextSearch}}"
       </div>
-      <div v-for="data in results" :key="data._id" class="item-row">
+      <div v-for="data in filteredResults" :key="data._id" class="item-row">
         <highlight-element :data="data"></highlight-element>
       </div>
+    </div>
+    <div>
+      <button @click="previousPage">Previous</button>
+      Page: {{currentPage}}/{{Math.ceil(results.length/10)}}
+      <button @click="nextPage">Next</button>
     </div>
     <!-- <div v-if="!results.length" class="background-search"></div> -->
   </div>
@@ -38,7 +43,8 @@ export default {
       searchText: "",
       results: [],
       loadingState: false,
-      sentTextSearch: ""
+      sentTextSearch: "",
+      currentPage: 1
     };
   },
   mounted: function() {
@@ -79,12 +85,26 @@ export default {
             return ax.localeCompare(bs, undefined, {numeric: true})
           });
           self.loadingState = false
+          self.currentPage = 1
         });
     });
   },
   watch: {
     searchText(newText) {
       textSearchSubject.next(newText)
+    }
+  },
+  computed: {
+    filteredResults() {
+      return this.results.filter((e, idx) => idx >= (this.currentPage-1) * 10 && idx < (this.currentPage) * 10)
+    }
+  },
+  methods: {
+    nextPage: function() {
+      if (this.currentPage * 10 < this.results.length) this.currentPage = this.currentPage + 1
+    },
+    previousPage: function() {
+      if (this.currentPage > 1) this.currentPage = this.currentPage - 1
     }
   }
 };
